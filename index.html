@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GAME TEBAK JAWABAN — Bunga Tunggal, Bunga Majemuk, dan Anuitas</title>
+<style>
+  :root{
+    --primary:#2563eb; --primary-dark:#1e40af; --success:#16a34a;
+    --danger:#dc2626; --bg:#f1f5f9; --card:#fff; --text:#0f172a;
+    --muted:#64748b; --border:#e2e8f0;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);}
+  header{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+  header h1{font-size:1.05rem;margin:0;line-height:1.3;}
+  header h1 small{display:block;font-size:.75rem;font-weight:400;opacity:.85;margin-top:2px;}
+  .header-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .nav-btn{background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.4);padding:8px 14px;border-radius:10px;font-size:.9rem;font-weight:600;cursor:pointer;font-family:inherit;}
+  .nav-btn:hover{background:rgba(255,255,255,.3);}
+  .nav-btn.active{background:#fff;color:var(--primary-dark);}
+  .badge{background:rgba(255,255,255,.2);padding:4px 12px;border-radius:999px;font-size:.85rem;}
+  main{max-width:1200px;margin:0 auto;padding:20px;display:grid;grid-template-columns:1fr;gap:16px;}
+  .card{background:var(--card);border-radius:14px;padding:20px;box-shadow:0 4px 14px rgba(15,23,42,.06);border:1px solid var(--border);}
+  .card h2{margin-top:0;font-size:1.1rem;color:var(--primary-dark);}
+  label{display:block;font-weight:600;margin-bottom:6px;font-size:.9rem;}
+  input,select{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:1rem;font-family:inherit;outline:none;background:#fff;}
+  input:focus,select:focus{border-color:var(--primary);}
+  input[readonly]{background:#f1f5f9;color:var(--muted);}
+  button{background:var(--primary);color:#fff;border:none;padding:12px 20px;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;font-family:inherit;}
+  button:hover{background:var(--primary-dark);}
+  button.secondary{background:#e2e8f0;color:var(--text);}
+  button.success{background:var(--success);}
+  button.danger{background:var(--danger);}
+  button:disabled{background:#cbd5e1;color:#64748b;cursor:not-allowed;}
+  .row{display:flex;gap:12px;flex-wrap:wrap;}
+  .row>*{flex:1;min-width:140px;}
+  .muted{color:var(--muted);font-size:.9rem;}
+  .soal-box{background:#eff6ff;border-left:4px solid var(--primary);padding:14px 16px;border-radius:8px;margin:12px 0;line-height:1.6;}
+  .feedback{margin-top:14px;padding:18px;border-radius:12px;font-weight:700;text-align:center;display:none;font-size:1.15rem;line-height:1.5;}
+  .feedback.correct{background:#dcfce7;color:#166534;border:2px solid #86efac;display:block;animation:pop .3s ease;}
+  .feedback.wrong{background:#fef3c7;color:#92400e;border:2px solid #fcd34d;display:block;animation:pop .3s ease;}
+  @keyframes pop{0%{transform:scale(.9);opacity:0;}100%{transform:scale(1);opacity:1;}}
+  .hidden{display:none !important;}
+  .student-info{background:#eff6ff;padding:10px 14px;border-radius:10px;margin-bottom:14px;}
+  .leaderboard{list-style:none;padding:0;margin:0;}
+  .leaderboard li{padding:8px 12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+  .applause,.star-burst{position:fixed;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;font-size:10rem;z-index:999;opacity:0;transition:opacity .3s;}
+  .applause.show{opacity:1;animation:clap .5s ease infinite;}
+  .star-burst.show{opacity:1;animation:twinkle .5s ease infinite;}
+  @keyframes clap{0%,100%{transform:scale(1) rotate(-8deg);}50%{transform:scale(1.2) rotate(8deg);}}
+  @keyframes twinkle{0%,100%{transform:scale(1) rotate(0);opacity:.7;}50%{transform:scale(1.3) rotate(20deg);opacity:1;}}
+  .soal-list{max-height:460px;overflow-y:auto;margin-top:8px;padding-right:4px;}
+  .soal-item{padding:12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;font-size:.9rem;background:#fff;transition:all .15s;}
+  .soal-item .kode{font-weight:700;color:var(--primary-dark);margin-right:6px;}
+  .soal-item .jenis{display:inline-block;font-size:.75rem;padding:2px 8px;border-radius:999px;background:#e0e7ff;color:#3730a3;margin-left:6px;}
+  .soal-item.bisa-pilih{cursor:pointer;}
+  .soal-item.bisa-pilih:hover{background:#f8fafc;border-color:var(--primary);}
+  .soal-item.dipilih{background:#dbeafe;border-color:var(--primary);box-shadow:0 0 0 2px rgba(37,99,235,.25);}
+  .soal-item.aktif{background:#fef9c3;border-color:#facc15;box-shadow:0 0 0 2px rgba(250,204,21,.35);}
+  .soal-item.sudah{background:#f1f5f9;border-color:#cbd5e1;color:#94a3b8;cursor:not-allowed;opacity:.75;}
+  .soal-item.sudah .kode{color:#94a3b8;}
+  .soal-item.sudah .jenis{background:#e2e8f0;color:#64748b;}
+  .soal-item.sudah::after{content:" ✕ sudah dikerjakan oleh " attr(data-oleh);color:#64748b;font-weight:600;font-size:.8rem;margin-left:8px;font-style:italic;}
+  .soal-item.terkunci{background:#fee2e2;border-color:#fca5a5;color:#991b1b;cursor:not-allowed;opacity:.85;}
+  .soal-item.terkunci .kode{color:#991b1b;}
+  .soal-item.terkunci .jenis{background:#fecaca;color:#991b1b;}
+  .soal-item.terkunci::after{content:" 🔒 sedang dikerjakan oleh " attr(data-oleh);color:#991b1b;font-weight:700;font-size:.8rem;margin-left:8px;font-style:italic;}
+  .soal-item.aktif::after{content:" ← sedang kamu kerjakan";color:#a16207;font-weight:700;font-size:.8rem;margin-left:8px;}
+  .soal-item.dipilih::after{content:" ← klik tombol Kerjakan di bawah";color:var(--primary-dark);font-weight:700;font-size:.8rem;margin-left:8px;}
+
+  .aksi-kerjakan{
+    background:#dbeafe;border:2px solid var(--primary);border-radius:12px;
+    padding:14px 16px;margin:12px 0;display:flex;align-items:center;
+    justify-content:space-between;gap:12px;flex-wrap:wrap;
+  }
+  .aksi-kerjakan .info{flex:1;min-width:200px;font-size:.9rem;}
+  .aksi-kerjakan .info strong{display:block;color:var(--primary-dark);margin-bottom:4px;}
+  .btn-kerjakan{
+    background:var(--success);color:#fff;padding:14px 28px;
+    font-size:1rem;font-weight:700;border-radius:12px;
+    box-shadow:0 4px 12px rgba(22,163,74,.35);
+    animation:pulse 1.5s ease-in-out infinite;
+  }
+  .btn-kerjakan:hover{background:#15803d;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.04);}}
+
+  .kotak-aktif{
+    background:#fef3c7;border:2px dashed #f59e0b;border-radius:12px;
+    padding:14px 16px;margin-bottom:12px;font-size:.95rem;
+  }
+  .kotak-aktif strong{color:#b45309;}
+  .kotak-aktif .catatan{display:block;margin-top:6px;font-size:.85rem;color:#92400e;font-style:italic;}
+
+  #log{font-size:.85rem;color:var(--muted);margin-top:8px;white-space:pre-wrap;min-height:1.2em;font-weight:600;}
+  #log.ok{color:var(--success);}
+  #log.err{color:var(--danger);}
+  .riwayat{font-size:1.2rem;letter-spacing:3px;}
+  .pill{padding:2px 8px;border-radius:999px;font-size:.75rem;background:#e0e7ff;color:#3730a3;margin-left:6px;}
+
+  .grid-soal{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(76px, 1fr));
+    gap:10px;
+    margin-top:10px;
+  }
+  .grid-soal button{
+    padding:0;height:68px;font-size:1.2rem;font-weight:700;
+    background:#e2e8f0;color:var(--text);border-radius:12px;
+    border:2px solid transparent;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;line-height:1.1;cursor:pointer;
+    transition:all .15s;
+  }
+  .grid-soal button .kode-kecil{font-size:.65rem;font-weight:600;color:var(--muted);margin-top:2px;}
+  .grid-soal button:hover:not(:disabled){background:#cbd5e1;}
+  .grid-soal button.aktif{background:var(--primary);color:#fff;border-color:var(--primary-dark);box-shadow:0 0 0 3px rgba(37,99,235,.3);}
+  .grid-soal button.aktif .kode-kecil{color:#dbeafe;}
+  .grid-soal button.sudah{background:#f1f5f9;color:#94a3b8;cursor:not-allowed;text-decoration:line-through;}
+  .grid-soal button.sudah .kode-kecil{color:#cbd5e1;}
+  .grid-soal button.terkunci{background:#fee2e2;color:#991b1b;cursor:not-allowed;}
+  .grid-soal button.terkunci .kode-kecil{color:#991b1b;}
+
+  .riwayat-pribadi{
+    background:#f0fdf4;border:1px solid #86efac;border-radius:10px;
+    padding:12px 14px;margin-top:12px;
+  }
+  .riwayat-pribadi h3{margin:0 0 8px;font-size:1rem;color:#166534;}
+  .riwayat-list{font-size:1.4rem;letter-spacing:4px;word-break:break-all;}
+  .empty{color:var(--muted);font-style:italic;}
+  .pin-box{max-width:420px;margin:40px auto;}
+  .pin-box h2{text-align:center;}
+  .pin-error{color:var(--danger);font-size:.9rem;margin-top:8px;min-height:1.2em;font-weight:600;}
+  .lock-icon{font-size:3rem;text-align:center;display:block;margin-bottom:8px;}
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    background:#0f172a;color:#fff;padding:12px 24px;border-radius:10px;
+    font-weight:600;z-index:1000;opacity:0;transition:opacity .3s, bottom .3s;
+    pointer-events:none;max-width:90vw;text-align:center;
+  }
+  .toast.show{opacity:1;bottom:36px;}
+
+  .panel-cek-besar{padding:24px;}
+  .panel-cek-besar h2{font-size:1.4rem;text-align:center;}
+  .panel-cek-besar .petunjuk{
+    background:#eff6ff;border:2px solid #bfdbfe;border-radius:12px;
+    padding:14px 18px;margin:16px 0;font-size:1rem;line-height:1.6;
+    text-align:center;color:var(--primary-dark);font-weight:500;
+  }
+  .panel-cek-besar label{font-size:1rem;}
+  .panel-cek-besar input, .panel-cek-besar select{font-size:1.2rem;padding:14px 18px;}
+  .panel-cek-besar .btn-kirim{
+    font-size:1.3rem;padding:18px 28px;background:var(--success);
+    border-radius:14px;box-shadow:0 6px 16px rgba(22,163,74,.35);
+    font-weight:700;
+  }
+  .panel-cek-besar .btn-kirim:hover{background:#15803d;}
+  .panel-cek-besar .soal-box{font-size:1.05rem;padding:18px 20px;}
+  .panel-cek-besar .feedback{font-size:1.5rem;padding:24px;}
+  .panel-cek-besar .nama-maju{
+    background:#fef3c7;border:2px solid #f59e0b;border-radius:12px;
+    padding:12px 16px;text-align:center;margin-bottom:16px;
+    font-size:1rem;color:#92400e;
+  }
+  .panel-cek-besar .nama-maju strong{color:#b45309;display:block;font-size:1.3rem;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎮 GAME TEBAK JAWABAN
+    <small>Materi: Bunga Tunggal, Bunga Majemuk, dan Anuitas</small>
+  </h1>
+  <div class="header-right">
+    <button class="nav-btn active" id="btnPanelSiswa" type="button">👨‍🎓 Panel Siswa</button>
+    <button class="nav-btn" id="btnPanelCek" type="button">✅ Panel Cek Kebenaran 🔒</button>
+    <span class="badge" id="modeBadge">Mode Siswa</span>
+  </div>
+</header>
+
+<main id="main">
+
+  <section id="panelPin" class="hidden">
+    <div class="card pin-box">
+      <span class="lock-icon">🔒</span>
+      <h2>Masukkan Kode PIN</h2>
+      <p class="muted" style="text-align:center;">Panel Cek Kebenaran untuk operator.</p>
+      <label for="inputPin" style="margin-top:12px;">Kode PIN</label>
+      <input type="password" id="inputPin" placeholder="Masukkan PIN..." autocomplete="off" />
+      <div class="pin-error" id="pinError"></div>
+      <div class="row" style="margin-top:14px;">
+        <button id="btnPinMasuk" type="button">Masuk</button>
+        <button class="secondary" id="btnPinBatal" type="button">Batal</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="panelSiswa">
+    <div class="card" id="cardLogin">
+      <h2>👋 Selamat Datang di Game Tebak Jawaban!</h2>
+      <p class="muted">Pilih namamu dari daftar, lalu klik Masuk.</p>
+      <div class="row" style="margin-top:12px;">
+        <div style="flex:2;">
+          <label for="pilihNama">Nama Lengkap</label>
+          <select id="pilihNama">
+            <option value="">-- Pilih Nama --</option>
+          </select>
+        </div>
+        <div>
+          <label for="absenSiswa">Nomor Absen</label>
+          <input type="text" id="absenSiswa" readonly placeholder="otomatis" />
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <button id="btnMulai" type="button">Masuk 🚀</button>
+      </div>
+      <div id="log"></div>
+    </div>
+
+    <div id="gameArea" class="hidden">
+      <div class="student-info">
+        👤 <strong id="infoNama">-</strong> &nbsp;|&nbsp; No. Absen: <strong id="infoAbsen">-</strong>
+      </div>
+
+      <div class="card">
+        <h2>🔔 Babak Rebutan</h2>
+        <p class="muted">
+          <strong>Pilih soal yang ingin kamu kerjakan, lalu klik tombol "Kerjakan".</strong>
+          Jawaban salah boleh dicoba lagi. Soal baru dianggap selesai jika sudah dijawab benar.
+        </p>
+
+        <div class="kotak-aktif hidden" id="infoSedangDikerjakan">
+          <em>Belum ada soal yang dipilih.</em>
+        </div>
+
+        <div class="aksi-kerjakan hidden" id="kotakAksiKerjakan">
+          <div class="info">
+            <strong>Soal No. <span id="aksiNoSoal">-</span> — <span id="aksiKodeSoal">-</span></strong>
+            <span id="aksiTeksSoal">-</span>
+          </div>
+          <button class="btn-kerjakan" id="btnKerjakan" type="button">✅ Kerjakan Soal Ini</button>
+        </div>
+
+        <div class="soal-list" id="daftarSoalSiswa"></div>
+
+        <div class="riwayat-pribadi" id="riwayatPribadi">
+          <h3>🏅 Riwayat Penilaianmu</h3>
+          <div class="riwayat-list" id="riwayatPribadiList"><span class="empty">Belum ada penilaian.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="panelCek" class="hidden">
+    <div class="card panel-cek-besar">
+      <h2>✅ Panel Cek Kebenaran</h2>
+      <div class="petunjuk">
+        📣 <strong>Murid maju satu-satu ke depan.</strong><br>
+        Pilih namamu → klik nomor soal → ketik jawaban → klik <strong>Kirim &amp; Cek Otomatis</strong>.<br>
+        <span style="color:#92400e;font-size:.9rem;">Kalau jawaban belum tepat, murid boleh coba lagi.</span>
+      </div>
+
+      <div class="nama-maju hidden" id="namaMajuBox">
+        Murid yang sedang maju:
+        <strong id="namaMajuTeks">-</strong>
+      </div>
+
+      <label for="cekPilihSiswa">1. Pilih Nama Kamu</label>
+      <select id="cekPilihSiswa"><option value="">-- Pilih Nama --</option></select>
+
+      <label style="margin-top:16px;">2. Klik Nomor Soal yang Kamu Kerjakan</label>
+      <div class="grid-soal" id="gridSoalCek"></div>
+
+      <label style="margin-top:16px;">3. Soal yang Dipilih</label>
+      <div class="soal-box" id="soalCekBox" style="margin-top:10px;">
+        <em>Belum ada soal dipilih.</em>
+      </div>
+
+      <label for="cekJawaban" style="margin-top:14px;">4. Tulis Jawabanmu</label>
+      <input type="text" id="cekJawaban" placeholder="Ketik jawabanmu di sini..." />
+
+      <div class="row" style="margin-top:16px;">
+        <button class="btn-kirim" id="btnKirimJawaban" type="button">📨 Kirim &amp; Cek Otomatis</button>
+      </div>
+
+      <div class="feedback" id="fbCek"></div>
+    </div>
+
+    <div class="card">
+      <h2>📋 Rekap Semua Siswa</h2>
+      <p class="muted">Hasil berupa 👏 (terima kasih telah berusaha) dan ⭐ (yuk, coba cara berpikir yang lain).</p>
+      <ul class="leaderboard" id="leaderboardCek"><li class="muted">Belum ada siswa.</li></ul>
+      <button class="secondary" id="btnReset" type="button" style="margin-top:12px;">🔄 Reset Semua Data</button>
+    </div>
+
+    <div class="card">
+      <h2>⚙️ Pengaturan</h2>
+      <p class="muted">Kamu sedang di Panel Cek Kebenaran. Untuk kembali ke Panel Siswa, klik <strong>Panel Siswa</strong> di atas.</p>
+      <button class="secondary" id="btnKeluarCek" type="button">🔓 Keluar dari Panel Cek Kebenaran</button>
+    </div>
+  </section>
+</main>
+
+<div class="applause" id="applause">👏</div>
+<div class="star-burst" id="starBurst">⭐</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   KONFIGURASI
+   ========================================================= */
+var PIN_CEK = "SMAN9MALANG";
+var STORAGE_KEY = "game_tebak_github_v1";
+var CHANNEL_NAME = "game_tebak_github_ch_v1";
+
+/* =========================================================
+   DAFTAR NAMA
+   ========================================================= */
+var DAFTAR_NAMA = [
+  "Abigail Aurelia Queen Bilqis",
+  "Adelard Shahzad Zeehan",
+  "Ahmad Michael Akmal Akbar",
+  "Aldian Kautsar Setiawan",
+  "Ali Wasil Nugroho",
+  "Alkeano Rizky Putra Bahri",
+  "Almira Nafisha Ramadiena",
+  "Anya Kalia Nirwasita Wilona",
+  "Bawita Prameswari Tungga Dewi",
+  "Bimo Satrio Damargita",
+  "Callysta Aqila Nareswari",
+  "Chiara Sabiya Kanaewibowo",
+  "Dara Novita Permatasari",
+  "Dyah Pramesthi",
+  "Gabriella Ivana Simorly",
+  "Ghitta Fatih Nur Rizqi",
+  "Jacinda Zahra Ardelia",
+  "Kevin Ihsan Alfarizi",
+  "Khalila Shafa Arista",
+  "Lutfia Ayu Pramita",
+  "Maiza Malika Rahman",
+  "Muhammad Farros Al Fawwaz",
+  "Nadya Berlianti Adam Fariski",
+  "Nia Alzanera",
+  "Prabu Hekal Setyo Abimanyu",
+  "Queena Faradissa Az Zahra",
+  "Radinka Kirana Dewi",
+  "Raihan Akbar Akmali",
+  "Rasya Dwi Alfian Martadinata",
+  "Raudina Fithriyyatun Nuha",
+  "Rayhan Hisyam",
+  "Rr Amanda Maharani Wiryawan Putri",
+  "Rr.Aurella Keiziah Permana",
+  "Syafira Az Zahra Putri Kyranna",
+  "Uzdah Ghazi Abqoriyah",
+  "Virna Oktriana Putri"
+];
+
+/* =========================================================
+   SOAL REBUTAN
+   ========================================================= */
+var SOAL_REBUTAN = [
+  {kode:"A1", jenis:"Bunga Tunggal", teks:"Modal awal sebesar Rp5.000.000 dibungakan dengan suku bunga tunggal 12% per tahun. Hitunglah besar bunga yang diperoleh setelah 9 bulan!", jawaban:450000},
+  {kode:"A2", jenis:"Bunga Tunggal", teks:"Seseorang meminjam uang di bank dengan suku bunga tunggal 15% per tahun. Setelah 2 tahun, total pengembalian pinjaman tersebut menjadi Rp7.800.000. Tentukan besar pinjaman awalnya!", jawaban:6000000},
+  {kode:"A3", jenis:"Bunga Tunggal", teks:"Tabungan sebesar Rp8.000.000 setelah dibungakan dengan suku bunga tunggal selama 3 tahun 4 bulan berubah menjadi Rp10.240.000. Tentukan persentase suku bunga tunggal per tahun! (Sebelum mengubah ke persentase, bulatkan jawaban menjadi desimal tiga)", jawaban:8.4},
+  {kode:"A4", jenis:"Bunga Tunggal", teks:"Modal sebesar Rp12.000.000 disimpan di bank dengan suku bunga tunggal 9% per tahun. Jika total bunga yang diterima adalah Rp3.240.000, berapa lama modal tersebut disimpan (dalam satuan bulan)?", jawaban:36},
+  {kode:"A5", jenis:"Bunga Tunggal", teks:"Pak Budi meminjam uang di koperasi dengan sistem bunga tunggal sebesar 1,5% per bulan. Jika ia meminjam Rp6.000.000 selama 10 bulan, berapa total pengembalian yang harus ia bayar?", jawaban:6900000},
+  {kode:"A6", jenis:"Bunga Tunggal", teks:"Suatu modal mula-mula Rp10.000.000. Setelah 2 tahun 6 bulan, modal tersebut menjadi Rp13.000.000 dengan sistem bunga tunggal. Tentukan besar suku bunga per semester!", jawaban:6},
+  {kode:"A7", jenis:"Bunga Tunggal", teks:"Uang sebesar Rp15.000.000 ditabung di bank dengan suku bunga tunggal 8% per tahun. Berapa lama waktu yang dibutuhkan (dalam bulan) agar bunga yang diperoleh mencapai Rp4.800.000?", jawaban:48},
+  {kode:"A8", jenis:"Bunga Tunggal", teks:"Sebuah pinjaman Rp20.000.000 dikenakan bunga tunggal sebesar 1,25% per bulan. Jika pinjaman tersebut dilunasi sekaligus setelah 1 tahun, berapa besar total uang yang harus dibayarkan?", jawaban:23000000},
+  {kode:"A9", jenis:"Bunga Tunggal", teks:"Modal sebesar Rp7.500.000 dibungakan dengan suku bunga tunggal p% per tahun selama 4 tahun sehingga menjadi Rp10.500.000. Tentukan nilai p!", jawaban:10},
+  {kode:"A10", jenis:"Bunga Tunggal", teks:"Seseorang menabung Rp4.000.000 di bank dengan suku bunga tunggal tertentu. Dalam waktu 8 bulan, tabungannya menjadi Rp4.320.000. Berapa suku bunga tunggal per triwulan?", jawaban:3},
+  {kode:"A11", jenis:"Bunga Tunggal", teks:"Modal Rp18.000.000 dipinjamkan dengan bunga tunggal 10% per tahun. Jika setelah pelunasan totalnya menjadi Rp23.400.000, berapa hari modal tersebut dipinjamkan (gunakan 1 tahun = 360 hari)", jawaban:1080},
+  {kode:"A12", jenis:"Bunga Tunggal", teks:"Pak Andi menginvestasikan uangnya sebesar Rp25.000.000 dengan bunga tunggal 12% per tahun. Agar total investasinya bernilai Rp34.000.000, berapa bulan waktu yang diperlukan?", jawaban:36},
+  {kode:"B1", jenis:"Bunga Majemuk", teks:"Modal sebesar Rp10.000.000 dibungakan dengan suku bunga majemuk 8% per tahun. Tentukan besar modal tersebut setelah 3 tahun! (Catatan : 1,08^3 ≈ 1,26)", jawaban:12600000},
+  {kode:"B2", jenis:"Bunga Majemuk", teks:"Suatu modal sebesar Rp5.000.000 disimpan di bank dengan suku bunga majemuk 10% per tahun. Tentukan nilai akhir modal tersebut setelah 2 tahun! (Catatan : hasil perpangkatan faktor penghitungan tidak perlu dibulatkan)", jawaban:6050000},
+  {kode:"B3", jenis:"Bunga Majemuk", teks:"Seseorang menabung di bank dengan sistem bunga majemuk 5% per semester. Setelah 2 tahun, uangnya di bank menjadi Rp18.232.590,00. Berapa besar uang yang ditabungkan pada awal mulanya? (Catatan : hasil perpangkatan faktor penghitungan dibulatkan empat desimal; hasil penghitungan akhir tanpa koma)", jawaban:15000074},
+  {kode:"B4", jenis:"Bunga Majemuk", teks:"Seseorang menginvestasikan uang sebesar Rp15.000.000 dengan suku bunga majemuk 6% per tahun yang dihitung setiap semester. Tentukan nilai akhir investasi tersebut setelah 2 tahun! (Catatan : hasil perpangkatan faktor penghitungan dibulatkan tiga desimal)", jawaban:16890000},
+  {kode:"B5", jenis:"Bunga Majemuk", teks:"Suatu modal menjadi Rp12.100.000 setelah dibungakan dengan bunga majemuk 10% per tahun selama 2 tahun. Berapa besar modal awalnya? (hasil penghitungan akhir tanpa koma)", jawaban:10000000},
+  {kode:"B6", jenis:"Bunga Majemuk", teks:"Pinjaman sebesar Rp20.000.000 dikenakan suku bunga majemuk 2% per bulan. Tentukan besar pinjaman setelah 5 bulan! (Catatan : hasil perpangkatan faktor penghitungan dibulatkan tiga desimal)", jawaban:22080000},
+  {kode:"B7", jenis:"Bunga Majemuk", teks:"Modal sebesar Rp2.000.000 dibungakan dengan suku bunga majemuk tiap triwulan. Jika dalam 1 tahun modal tersebut menjadi Rp162.000.000, tentukan faktor penghitungan per triwulannya!", jawaban:3},
+  {kode:"B8", jenis:"Bunga Majemuk", teks:"Tabungan awal sebesar Rp9.000.000 dengan suku bunga majemuk 5% per tahun. Berapa total bunga yang diperoleh setelah tahun ke-3? (Catatan : 1,05^3 ≈ 1,16)", jawaban:1440000},
+  {kode:"B9", jenis:"Bunga Majemuk", teks:"Jika modal Rp12.000.000 disimpan dengan bunga majemuk 12% per tahun yang dihitung setiap bulan, berapa nilai akhir setelah 3 bulan? (Catatan : hasil perpangkatan faktor penghitungan dibulatkan empat desimal)", jawaban:12363600},
+  {kode:"B10", jenis:"Bunga Majemuk", teks:"Suatu modal setelah 4 tahun dengan bunga majemuk 10% per tahun bernilai Rp14.641.000. Tentukan besar modal awal tersebut! (Catatan : hasil perpangkatan faktor penghitungan tidak perlu dibulatkan)", jawaban:10000000},
+  {kode:"B11", jenis:"Bunga Majemuk", teks:"Sebuah modal Rp10.000.000 diinvestasikan pada bank dengan suku bunga majemuk 7% per tahun. Tentukan selisih nilai akhir antara akhir tahun ke-3 dan akhir tahun ke-2! (Catatan : hasil perpangkatan faktor penghitungan dibulatkan dua desimal)", jawaban:900000},
+  {kode:"B12", jenis:"Bunga Majemuk", teks:"Pak Doni meminjam Rp25.000.000 dengan sistem bunga majemuk 1,5% per bulan. Jika pinjaman tersebut harus dilunasi setelah 8 bulan, berapa total uang yang harus dikembalikan? (Catatan : hasil perpangkatan faktor penghitungan dibulatkan empat desimal)", jawaban:28162500},
+  {kode:"C1", jenis:"Anuitas", teks:"Suatu pinjaman sebesar Rp10.000.000 akan dilunasi dengan sistem anuitas bulanan selama 2 tahun dengan suku bunga 2% per bulan. Tentukan besar anuitasnya! (Catatan : hasil perpangkatan faktor penghitungan tidak perlu dibulatkan)", jawaban:528711},
+  {kode:"C2", jenis:"Anuitas", teks:"Pinjaman sebesar Rp15.000.000 dilunasi dengan anuitas tahunan sebesar Rp3.500.000 dengan suku bunga 8% per tahun. Tentukan besar sisa pinjaman pada akhir tahun pertama!", jawaban:12700000},
+  {kode:"C3", jenis:"Anuitas", teks:"Suatu pinjaman dilunasi dengan anuitas bulanan. Jika besar angsuran pada bulan ke-3 adalah Rp450.000 dan besar bunga pada bulan ke-3 adalah Rp120.000, tentukan besar anuitas tersebut!", jawaban:570000},
+  {kode:"C4", jenis:"Anuitas", teks:"Pinjaman sebesar Rp20.000.000 dilunasi dengan sistem anuitas tahunan dengan suku bunga 10% per tahun selama 3 tahun. Tentukan besar angsuran pokok pada tahun pertama! (Catatan : hasil perpangkatan faktor penghitungan tidak perlu dibulatkan)", jawaban:6042296},
+  {kode:"C5", jenis:"Anuitas", teks:"Diketahui suatu anuitas sebesar Rp1.200.000 per bulan. Jika bunga pada bulan ke-5 adalah Rp300.000, berapa besar angsuran pokok pada bulan ke-5?", jawaban:900000},
+  {kode:"C6", jenis:"Anuitas", teks:"Suatu pinjaman Rp12.000.000 dibayar dengan anuitas bulanan selama 1 tahun dengan suku bunga 1,5% per bulan. Tentukan besar bunga pada bulan pertama!", jawaban:180000},
+  {kode:"C7", jenis:"Anuitas", teks:"Pinjaman sebesar Rp25.000.000 dilunasi dengan anuitas bulanan. Jika pada bulan ke-2 angsuran pokoknya adalah Rp850.000 dan bunga pada bulan tersebut adalah Rp240.000, berapakah besar anuitasnya?", jawaban:1090000},
+  {kode:"C8", jenis:"Anuitas", teks:"Pinjaman sebesar Rp8.000.000 dilunasi dengan anuitas bulanan dengan suku bunga 2% per bulan. Jika bunga pada bulan pertama adalah Rp160.000 dan anuitasnya Rp750.000, berapa besar sisa pinjaman setelah angsuran pertama?", jawaban:7410000},
+  {kode:"C9", jenis:"Anuitas", teks:"Pinjaman sebesar Rp10.000.000,00 dilunasi dengan anuitas bulanan sebesar Rp1.200.000,00. Jika suku bunga yang ditetapkan adalah 1,5% per bulan, tentukan besar bunga pada bulan kedua!", jawaban:135000},
+  {kode:"C10", jenis:"Anuitas", teks:"Pak Joko meminjam Rp30.000.000 dengan sistem anuitas tahunan selama 4 tahun pada suku bunga 9% per tahun. Tentukan besar anuitas tahunannya! (Catatan : hasil perpangkatan faktor penghitungan tidak perlu dibulatkan)", jawaban:9260187},
+  {kode:"C11", jenis:"Anuitas", teks:"Pinjaman sebesar Rp18.000.000 dilunasi dengan anuitas bulanan. Pada bulan ke-4, besar angsuran pokok adalah Rp600.000 dan besar bunga adalah Rp150.000. Tentukan besar anuitas pada bulan tersebut!", jawaban:750000},
+  {kode:"C12", jenis:"Anuitas", teks:"Suatu pinjaman awal sebesar Rp20.000.000 dilunasi dengan anuitas bulanan sebesar Rp2.000.000 dan suku bunga 1,5% per bulan. Tentukan besar angsuran pokok pada bulan pertama!", jawaban:1700000}
+];
+
+/* =========================================================
+   STATE
+   ========================================================= */
+var global = {
+  siswa: [],
+  sudahDikerjakan: {},
+  sedangDikerjakan: { index: null, oleh: null },
+  animasi: null
+};
+
+var local = {
+  modeCek: false,
+  siswaAktif: null,
+  soalRebutan: null,
+  soalFix: null,
+  soalCek: null
+};
+
+var lastAnimasiWaktu = 0;
+
+/* =========================================================
+   LOAD / SAVE / BROADCAST
+   ========================================================= */
+function loadGlobal(){
+  try{
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      var obj = JSON.parse(raw);
+      global.siswa = Array.isArray(obj.siswa) ? obj.siswa : [];
+      global.sudahDikerjakan = (obj.sudahDikerjakan && typeof obj.sudahDikerjakan === "object") ? obj.sudahDikerjakan : {};
+      global.sedangDikerjakan = (obj.sedangDikerjakan && typeof obj.sedangDikerjakan === "object") ? obj.sedangDikerjakan : { index: null, oleh: null };
+      global.animasi = obj.animasi || null;
+      if(global.animasi && global.animasi.waktu){ lastAnimasiWaktu = global.animasi.waktu; }
+    }
+  }catch(e){ console.warn(e); }
+}
+function saveGlobal(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(global)); }catch(e){}
+  try{
+    var ch = new BroadcastChannel(CHANNEL_NAME);
+    ch.postMessage({type:"update", global:global});
+    ch.close();
+  }catch(e){}
+}
+try{
+  var ch2 = new BroadcastChannel(CHANNEL_NAME);
+  ch2.onmessage = function(e){
+    if(!e.data) return;
+    if(e.data.type === "update"){
+      var oldAnimasi = global.animasi;
+      global = e.data.global;
+      if(!Array.isArray(global.siswa)) global.siswa = [];
+      if(typeof global.sudahDikerjakan !== "object" || global.sudahDikerjakan === null) global.sudahDikerjakan = {};
+      if(typeof global.sedangDikerjakan !== "object" || global.sedangDikerjakan === null) global.sedangDikerjakan = { index: null, oleh: null };
+      renderAll();
+      if(global.animasi && global.animasi.waktu && (!oldAnimasi || oldAnimasi.waktu !== global.animasi.waktu)){
+        if(global.animasi.waktu > lastAnimasiWaktu){
+          lastAnimasiWaktu = global.animasi.waktu;
+          tampilkanAnimasi(global.animasi.jenis);
+        }
+      }
+    }
+  };
+}catch(e){}
+window.addEventListener("storage", function(e){
+  if(e.key === STORAGE_KEY && e.newValue){
+    try{
+      var oldAnimasi = global.animasi;
+      var obj = JSON.parse(e.newValue);
+      global.siswa = Array.isArray(obj.siswa) ? obj.siswa : [];
+      global.sudahDikerjakan = (obj.sudahDikerjakan && typeof obj.sudahDikerjakan === "object") ? obj.sudahDikerjakan : {};
+      global.sedangDikerjakan = (obj.sedangDikerjakan && typeof obj.sedangDikerjakan === "object") ? obj.sedangDikerjakan : { index: null, oleh: null };
+      global.animasi = obj.animasi || null;
+      renderAll();
+      if(global.animasi && global.animasi.waktu && (!oldAnimasi || oldAnimasi.waktu !== global.animasi.waktu)){
+        if(global.animasi.waktu > lastAnimasiWaktu){
+          lastAnimasiWaktu = global.animasi.waktu;
+          tampilkanAnimasi(global.animasi.jenis);
+        }
+      }
+    }catch(err){}
+  }
+});
+
+/* =========================================================
+   UTIL
+   ========================================================= */
+function log(msg, tipe){
+  var el = document.getElementById("log");
+  if(el){ el.textContent = msg; el.className = tipe || ""; }
+}
+function toast(msg){
+  var el = document.getElementById("toast");
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(el._timer);
+  el._timer = setTimeout(function(){ el.classList.remove("show"); }, 3000);
+}
+function normalizeNumber(str){
+  if(str===null||str===undefined) return NaN;
+  var s = String(str).trim().toLowerCase();
+  s = s.replace(/rp\.?/g,"").replace(/\s/g,"");
+  if(s.indexOf(",")>-1 && s.indexOf(".")>-1){
+    s = s.replace(/\./g,"").replace(",",".");
+  } else if(s.indexOf(",")>-1){
+    s = s.replace(",",".");
+  } else {
+    s = s.replace(/\./g,"");
+  }
+  return parseFloat(s);
+}
+function cekJawaban(input, kunci){
+  if(typeof kunci === "string" && kunci.indexOf(";")>-1){
+    var parts = kunci.split(";").map(normalizeNumber);
+    var userParts = String(input).split(/[;,\s]+/).map(normalizeNumber).filter(function(x){return !isNaN(x);});
+    if(userParts.length!==parts.length) return false;
+    for(var i=0;i<parts.length;i++){ if(Math.abs(parts[i]-userParts[i])>=1) return false; }
+    return true;
+  }
+  var u = normalizeNumber(input);
+  var k = (typeof kunci==="number")?kunci:normalizeNumber(kunci);
+  if(isNaN(u)||isNaN(k)) return false;
+  return Math.abs(u-k) < 1;
+}
+function tampilkanAnimasi(jenis){
+  var el = (jenis === "benar") ? document.getElementById("applause") : document.getElementById("starBurst");
+  if(!el) return;
+  el.classList.remove("show");
+  void el.offsetWidth;
+  el.classList.add("show");
+  clearTimeout(el._timer);
+  el._timer = setTimeout(function(){ el.classList.remove("show"); }, 2500);
+}
+function getSiswa(nama){
+  if(!Array.isArray(global.siswa)) return null;
+  for(var i=0;i<global.siswa.length;i++){
+    if(global.siswa[i] && global.siswa[i].nama === nama) return global.siswa[i];
+  }
+  return null;
+}
+function pastikanSiswaAda(nama){
+  if(!Array.isArray(global.siswa)) global.siswa = [];
+  var s = getSiswa(nama);
+  if(!s){
+    var idx = DAFTAR_NAMA.indexOf(nama);
+    s = { nama: nama, absen: String(idx+1), riwayat: [] };
+    global.siswa.push(s);
+  }
+  if(!s.riwayat) s.riwayat = [];
+  return s;
+}
+function tambahRiwayat(nama, jenis){
+  var s = pastikanSiswaAda(nama);
+  s.riwayat.push(jenis);
+}
+function sudahDinilaiOleh(idx){
+  if(!global.sudahDikerjakan || typeof global.sudahDikerjakan !== "object") return null;
+  return global.sudahDikerjakan[String(idx)] || null;
+}
+function sedangDikerjakanOleh(idx){
+  if(!global.sedangDikerjakan) return null;
+  if(global.sedangDikerjakan.index === idx && global.sedangDikerjakan.oleh){
+    return global.sedangDikerjakan.oleh;
+  }
+  return null;
+}
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+function renderAll(){
+  renderDropdownNama();
+  renderSiswaSelectCek();
+  renderRekapCek();
+  renderDaftarSoalSiswa();
+  renderKotakAksiKerjakan();
+  renderKotakAktif();
+  renderGridSoalCek();
+  renderSoalCekBox();
+  renderNamaMaju();
+  renderRiwayatPribadi();
+  updateTampilanPanel();
+}
+
+function renderDropdownNama(){
+  var sel = document.getElementById("pilihNama");
+  if(!sel) return;
+  var current = sel.value;
+  sel.innerHTML = '<option value="">-- Pilih Nama --</option>';
+  DAFTAR_NAMA.forEach(function(nama, i){
+    var opt = document.createElement("option");
+    opt.value = nama;
+    opt.textContent = (i+1) + ". " + nama;
+    sel.appendChild(opt);
+  });
+  if(current) sel.value = current;
+}
+
+function updateTampilanPanel(){
+  var panelSiswa = document.getElementById("panelSiswa");
+  var panelCek = document.getElementById("panelCek");
+  var panelPin = document.getElementById("panelPin");
+  var btnSiswa = document.getElementById("btnPanelSiswa");
+  var btnCek = document.getElementById("btnPanelCek");
+
+  panelSiswa.classList.add("hidden");
+  panelCek.classList.add("hidden");
+  panelPin.classList.add("hidden");
+
+  if(local.modeCek){
+    panelCek.classList.remove("hidden");
+    document.getElementById("modeBadge").textContent = "Panel Cek Kebenaran";
+    btnSiswa.classList.remove("active");
+    btnCek.classList.add("active");
+  } else {
+    panelSiswa.classList.remove("hidden");
+    document.getElementById("modeBadge").textContent = "Mode Siswa";
+    btnSiswa.classList.add("active");
+    btnCek.classList.remove("active");
+  }
+}
+
+function renderSiswaSelectCek(){
+  var sel = document.getElementById("cekPilihSiswa");
+  if(!sel) return;
+  var current = sel.value;
+  sel.innerHTML = '<option value="">-- Pilih Nama --</option>';
+  DAFTAR_NAMA.forEach(function(nama, i){
+    var opt = document.createElement("option");
+    opt.value = nama;
+    var s = getSiswa(nama);
+    var info = "";
+    if(s && s.riwayat){
+      var benar = s.riwayat.filter(function(x){return x==="benar";}).length;
+      var salah = s.riwayat.filter(function(x){return x==="salah";}).length;
+      if(benar+salah>0) info = " — 👏" + benar + " ⭐" + salah;
+    }
+    opt.textContent = (i+1) + ". " + nama + info;
+    sel.appendChild(opt);
+  });
+  if(current) sel.value = current;
+}
+
+function renderNamaMaju(){
+  var box = document.getElementById("namaMajuBox");
+  var teks = document.getElementById("namaMajuTeks");
+  var sel = document.getElementById("cekPilihSiswa");
+  if(!box || !teks || !sel) return;
+  if(sel.value){
+    box.classList.remove("hidden");
+    teks.textContent = sel.value;
+  } else {
+    box.classList.add("hidden");
+    teks.textContent = "-";
+  }
+}
+
+function renderRekapCek(){
+  var ul = document.getElementById("leaderboardCek");
+  if(!ul) return;
+  if(!Array.isArray(global.siswa)){ ul.innerHTML = '<li class="muted">Belum ada siswa.</li>'; return; }
+  var adaIsi = global.siswa.filter(function(s){ return s && s.riwayat && s.riwayat.length>0; });
+  if(adaIsi.length===0){
+    ul.innerHTML = '<li class="muted">Belum ada penilaian.</li>';
+    return;
+  }
+  ul.innerHTML = adaIsi.map(function(s){
+    var r = s.riwayat || [];
+    var benar = r.filter(function(x){return x==="benar";}).length;
+    var salah = r.filter(function(x){return x==="salah";}).length;
+    var ikon = r.map(function(x){ return x==="benar" ? "👏" : "⭐"; }).join(" ");
+    return '<li>' +
+      '<span>👤 '+s.nama+' <span class="muted">(Absen '+s.absen+')</span></span>' +
+      '<span class="riwayat">'+ ikon +'</span>' +
+      '<span class="pill">👏'+benar+' ⭐'+salah+'</span>' +
+    '</li>';
+  }).join("");
+}
+
+function renderDaftarSoalSiswa(){
+  var c = document.getElementById("daftarSoalSiswa");
+  if(!c) return;
+  var soalDipilih = local.soalRebutan;
+  var soalFix = local.soalFix;
+  var adaFix = (soalFix !== null && soalFix !== undefined);
+
+  c.innerHTML = SOAL_REBUTAN.map(function(s,i){
+    var dinilaiOleh = sudahDinilaiOleh(i);
+    var sedangOleh = sedangDikerjakanOleh(i);
+    var olehSaya = (sedangOleh && sedangOleh === local.siswaAktif);
+
+    var cls = "soal-item";
+    var dataOleh = "";
+
+    if(dinilaiOleh){
+      cls += " sudah";
+      dataOleh = dinilaiOleh;
+    } else if(sedangOleh && !olehSaya){
+      cls += " terkunci";
+      dataOleh = sedangOleh;
+    } else if(olehSaya || (adaFix && i === soalFix)){
+      cls += " aktif";
+    } else if(!adaFix && i === soalDipilih){
+      cls += " dipilih";
+    } else if(!adaFix && !sedangOleh){
+      cls += " bisa-pilih";
+    }
+
+    return '<div class="'+cls+'" data-idx="'+i+'" data-oleh="'+dataOleh+'">' +
+      '<span class="kode">'+(i+1)+'.</span>' +
+      '<span class="kode">'+s.kode+'</span>' +
+      '<span class="jenis">'+s.jenis+'</span><br>' +
+      s.teks +
+    '</div>';
+  }).join("");
+
+  Array.prototype.forEach.call(c.querySelectorAll(".soal-item"), function(el){
+    el.addEventListener("click", function(){
+      var idx = parseInt(el.dataset.idx,10);
+      var dinilai = sudahDinilaiOleh(idx);
+      if(dinilai){
+        toast("Soal ini sudah dikerjakan oleh " + dinilai);
+        return;
+      }
+      var sedang = sedangDikerjakanOleh(idx);
+      if(sedang && sedang !== local.siswaAktif){
+        toast("Soal ini sedang dikerjakan oleh " + sedang + ". Pilih soal lain.");
+        return;
+      }
+      if(adaFix){
+        toast("Kamu sedang mengerjakan soal No. " + (soalFix+1) + ". Tidak bisa ganti soal.");
+        return;
+      }
+      if(!local.siswaAktif){
+        toast("Silakan login dulu.");
+        return;
+      }
+      local.soalRebutan = idx;
+      renderAll();
+    });
+  });
+}
+
+function renderKotakAksiKerjakan(){
+  var box = document.getElementById("kotakAksiKerjakan");
+  if(!box) return;
+  var adaFix = (local.soalFix !== null && local.soalFix !== undefined);
+  var soalDipilih = local.soalRebutan;
+
+  if(adaFix || soalDipilih === null || soalDipilih === undefined){
+    box.classList.add("hidden");
+    return;
+  }
+  var dinilai = sudahDinilaiOleh(soalDipilih);
+  var sedang = sedangDikerjakanOleh(soalDipilih);
+  if(dinilai || (sedang && sedang !== local.siswaAktif)){
+    local.soalRebutan = null;
+    box.classList.add("hidden");
+    return;
+  }
+  var s = SOAL_REBUTAN[soalDipilih];
+  document.getElementById("aksiNoSoal").textContent = soalDipilih+1;
+  document.getElementById("aksiKodeSoal").textContent = s.kode;
+  document.getElementById("aksiTeksSoal").textContent = s.teks;
+  box.classList.remove("hidden");
+}
+
+function renderKotakAktif(){
+  var box = document.getElementById("infoSedangDikerjakan");
+  if(!box) return;
+  var adaFix = (local.soalFix !== null && local.soalFix !== undefined);
+  if(!adaFix){
+    box.classList.add("hidden");
+    return;
+  }
+  var s = SOAL_REBUTAN[local.soalFix];
+  box.classList.remove("hidden");
+  box.innerHTML =
+    "🔔 <strong>Soal yang sedang kamu kerjakan:</strong> No. " + (local.soalFix+1) +
+    " [" + s.kode + "]<br>" +
+    "<span class='muted'>" + s.teks + "</span>" +
+    "<span class='catatan'>Jawaban salah boleh dicoba lagi. Soal selesai kalau sudah dijawab benar.</span>";
+}
+
+function renderRiwayatPribadi(){
+  var list = document.getElementById("riwayatPribadiList");
+  var wrap = document.getElementById("riwayatPribadi");
+  if(!list || !wrap) return;
+  if(!local.siswaAktif){
+    wrap.classList.add("hidden");
+    return;
+  }
+  wrap.classList.remove("hidden");
+  var s = getSiswa(local.siswaAktif);
+  if(!s || !s.riwayat || s.riwayat.length===0){
+    list.innerHTML = '<span class="empty">Belum ada penilaian.</span>';
+    return;
+  }
+  var ikon = s.riwayat.map(function(x){ return x==="benar" ? "👏" : "⭐"; }).join(" ");
+  var benar = s.riwayat.filter(function(x){return x==="benar";}).length;
+  var salah = s.riwayat.filter(function(x){return x==="salah";}).length;
+  list.innerHTML = ikon + ' <span class="pill">👏'+benar+' ⭐'+salah+'</span>';
+}
+
+function renderGridSoalCek(){
+  var grid = document.getElementById("gridSoalCek");
+  if(!grid) return;
+
+  var namaTerpilih = document.getElementById("cekPilihSiswa").value;
+  var soalFixDariHP = null;
+  if(global.sedangDikerjakan && global.sedangDikerjakan.oleh === namaTerpilih && global.sedangDikerjakan.index !== null){
+    soalFixDariHP = global.sedangDikerjakan.index;
+  }
+
+  grid.innerHTML = SOAL_REBUTAN.map(function(s,i){
+    var dinilaiOleh = sudahDinilaiOleh(i);
+    var sedangOleh = sedangDikerjakanOleh(i);
+    var pilihanku = (local.soalCek === i);
+    var pilihanMuridDariHP = (soalFixDariHP === i);
+
+    var cls = "";
+    var disabled = false;
+
+    if(dinilaiOleh){
+      cls = "sudah";
+      disabled = true;
+    } else if(sedangOleh && sedangOleh !== namaTerpilih){
+      cls = "terkunci";
+      disabled = true;
+    } else if(pilihanku || pilihanMuridDariHP){
+      cls = "aktif";
+    }
+
+    return '<button type="button" data-idx="'+i+'" class="'+cls+'" '+(disabled?'disabled':'')+'>' +
+      '<span>'+(i+1)+'</span>' +
+      '<span class="kode-kecil">'+s.kode+'</span>' +
+    '</button>';
+  }).join("");
+
+  Array.prototype.forEach.call(grid.querySelectorAll("button"), function(btn){
+    btn.addEventListener("click", function(){
+      var idx = parseInt(btn.dataset.idx,10);
+      var dinilai = sudahDinilaiOleh(idx);
+      if(dinilai){
+        toast("Soal ini sudah dinilai untuk " + dinilai);
+        return;
+      }
+      var sedang = sedangDikerjakanOleh(idx);
+      if(sedang && sedang !== document.getElementById("cekPilihSiswa").value){
+        toast("Soal ini sedang dikerjakan oleh " + sedang);
+        return;
+      }
+      local.soalCek = idx;
+      renderAll();
+    });
+  });
+}
+
+function renderSoalCekBox(){
+  var box = document.getElementById("soalCekBox");
+  if(!box) return;
+  var idx = local.soalCek;
+  if(idx === null || idx === undefined){
+    var namaTerpilih = document.getElementById("cekPilihSiswa").value;
+    if(namaTerpilih && global.sedangDikerjakan && global.sedangDikerjakan.oleh === namaTerpilih){
+      idx = global.sedangDikerjakan.index;
+    }
+  }
+  if(idx === null || idx === undefined){
+    box.innerHTML = "<em>Belum ada soal dipilih. Klik nomor soal di atas.</em>";
+  } else {
+    var s = SOAL_REBUTAN[idx];
+    box.innerHTML = "<strong>Soal No. "+(idx+1)+". ["+s.kode+"] "+s.jenis+"</strong><br>"+s.teks;
+  }
+}
+
+/* =========================================================
+   EVENT: NAVIGASI PANEL
+   ========================================================= */
+document.getElementById("btnPanelSiswa").addEventListener("click", function(){
+  local.modeCek = false;
+  renderAll();
+});
+
+document.getElementById("btnPanelCek").addEventListener("click", function(){
+  document.getElementById("panelSiswa").classList.add("hidden");
+  document.getElementById("panelCek").classList.add("hidden");
+  document.getElementById("panelPin").classList.remove("hidden");
+  document.getElementById("inputPin").value = "";
+  document.getElementById("pinError").textContent = "";
+  document.getElementById("inputPin").focus();
+});
+
+document.getElementById("btnPinBatal").addEventListener("click", function(){
+  renderAll();
+});
+
+document.getElementById("btnPinMasuk").addEventListener("click", function(){
+  var pin = document.getElementById("inputPin").value;
+  if(pin === PIN_CEK){
+    local.modeCek = true;
+    renderAll();
+  } else {
+    document.getElementById("pinError").textContent = "❌ PIN salah. Coba lagi.";
+    document.getElementById("inputPin").value = "";
+    document.getElementById("inputPin").focus();
+  }
+});
+document.getElementById("inputPin").addEventListener("keydown", function(e){
+  if(e.key === "Enter") document.getElementById("btnPinMasuk").click();
+});
+
+document.getElementById("btnKeluarCek").addEventListener("click", function(){
+  local.modeCek = false;
+  local.soalCek = null;
+  renderAll();
+});
+
+/* =========================================================
+   EVENT: DROPDOWN NAMA
+   ========================================================= */
+document.getElementById("pilihNama").addEventListener("change", function(){
+  var nama = this.value;
+  var absenEl = document.getElementById("absenSiswa");
+  if(!nama){ absenEl.value = ""; return; }
+  var idx = DAFTAR_NAMA.indexOf(nama);
+  absenEl.value = (idx+1);
+});
+
+document.getElementById("cekPilihSiswa").addEventListener("change", function(){
+  local.soalCek = null;
+  renderAll();
+});
+
+/* =========================================================
+   EVENT: LOGIN SISWA
+   ========================================================= */
+document.getElementById("btnMulai").addEventListener("click", function(){
+  var nama = document.getElementById("pilihNama").value;
+  var absen = document.getElementById("absenSiswa").value;
+  if(!nama){
+    log("⚠️ Pilih namamu dulu!", "err");
+    alert("Pilih namamu dulu dari daftar!");
+    return;
+  }
+  var s = getSiswa(nama);
+  if(!s){
+    s = { nama: nama, absen: absen, riwayat: [] };
+    if(!Array.isArray(global.siswa)) global.siswa = [];
+    global.siswa.push(s);
+  } else {
+    s.absen = absen;
+    if(!s.riwayat) s.riwayat = [];
+  }
+  local.siswaAktif = nama;
+  local.soalRebutan = null;
+  local.soalFix = null;
+  saveGlobal();
+  document.getElementById("infoNama").textContent = nama;
+  document.getElementById("infoAbsen").textContent = absen;
+  document.getElementById("cardLogin").classList.add("hidden");
+  document.getElementById("gameArea").classList.remove("hidden");
+  renderAll();
+  log("✅ Masuk: " + nama, "ok");
+});
+
+/* =========================================================
+   EVENT: TOMBOL KERJAKAN
+   ========================================================= */
+document.getElementById("btnKerjakan").addEventListener("click", function(){
+  if(local.soalRebutan === null || local.soalRebutan === undefined){
+    toast("Pilih soal dulu.");
+    return;
+  }
+  var idx = local.soalRebutan;
+
+  var dinilai = sudahDinilaiOleh(idx);
+  if(dinilai){
+    toast("Soal ini sudah dikerjakan oleh " + dinilai);
+    local.soalRebutan = null;
+    renderAll();
+    return;
+  }
+  var sedang = sedangDikerjakanOleh(idx);
+  if(sedang && sedang !== local.siswaAktif){
+    toast("Soal ini sedang dikerjakan oleh " + sedang);
+    local.soalRebutan = null;
+    renderAll();
+    return;
+  }
+
+  local.soalFix = idx;
+  global.sedangDikerjakan = { index: idx, oleh: local.siswaAktif };
+  saveGlobal();
+  renderAll();
+  toast("✅ Soal No. " + (idx+1) + " sudah dikunci. Maju ke depan.");
+});
+
+/* =========================================================
+   EVENT: KIRIM JAWABAN
+   ========================================================= */
+document.getElementById("btnKirimJawaban").addEventListener("click", function(){
+  var nama = document.getElementById("cekPilihSiswa").value;
+  var fb = document.getElementById("fbCek");
+  var jawaban = document.getElementById("cekJawaban").value;
+
+  if(!nama){
+    fb.className = "feedback wrong";
+    fb.innerHTML = "⚠️ Pilih namamu dulu!";
+    return;
+  }
+
+  var idxSoal = local.soalCek;
+  if(idxSoal === null || idxSoal === undefined){
+    if(global.sedangDikerjakan && global.sedangDikerjakan.oleh === nama && global.sedangDikerjakan.index !== null){
+      idxSoal = global.sedangDikerjakan.index;
+    }
+  }
+  if(idxSoal === null || idxSoal === undefined){
+    fb.className = "feedback wrong";
+    fb.innerHTML = "⚠️ Belum ada soal dipilih. Klik nomor soal di atas.";
+    return;
+  }
+  if(!jawaban || !jawaban.trim()){
+    fb.className = "feedback wrong";
+    fb.innerHTML = "⚠️ Ketik jawabanmu dulu!";
+    return;
+  }
+
+  var dinilai = sudahDinilaiOleh(idxSoal);
+  if(dinilai){
+    fb.className = "feedback wrong";
+    fb.innerHTML = "⚠️ Soal No. " + (idxSoal+1) + " sudah dinilai untuk " + dinilai + ".";
+    return;
+  }
+
+  var s = SOAL_REBUTAN[idxSoal];
+  var benar = cekJawaban(jawaban, s.jawaban);
+  var jenis = benar ? "benar" : "salah";
+
+  pastikanSiswaAda(nama);
+  tambahRiwayat(nama, jenis);
+
+  if(benar){
+    global.sudahDikerjakan[String(idxSoal)] = nama;
+    if(global.sedangDikerjakan && global.sedangDikerjakan.index === idxSoal){
+      global.sedangDikerjakan = { index: null, oleh: null };
+    }
+    local.soalCek = null;
+    if(local.soalFix === idxSoal) local.soalFix = null;
+    if(local.soalRebutan === idxSoal) local.soalRebutan = null;
+
+    fb.className = "feedback correct";
+    fb.innerHTML = "👏👏👏 <br>Terima kasih telah berusaha!";
+    toast("✅ Soal No. " + (idxSoal+1) + " selesai. Benar!");
+  } else {
+    global.sedangDikerjakan = { index: idxSoal, oleh: nama };
+    local.soalCek = idxSoal;
+
+    fb.className = "feedback wrong";
+    fb.innerHTML = "⭐⭐⭐ <br>Yuk, coba cara berpikir yang lain!";
+    toast("⭐ Belum tepat. Coba lagi!");
+  }
+
+  global.animasi = { jenis: jenis, nama: nama, waktu: Date.now() };
+
+  saveGlobal();
+  renderAll();
+  tampilkanAnimasi(jenis);
+
+  document.getElementById("cekJawaban").value = "";
+  document.getElementById("cekJawaban").focus();
+});
+
+document.getElementById("cekJawaban").addEventListener("keydown", function(e){
+  if(e.key === "Enter") document.getElementById("btnKirimJawaban").click();
+});
+
+/* =========================================================
+   EVENT: RESET
+   ========================================================= */
+document.getElementById("btnReset").addEventListener("click", function(){
+  var yakin = confirm("Reset semua data siswa dan riwayat penilaian?");
+  if(!yakin) return;
+
+  global = {
+    siswa: [],
+    sudahDikerjakan: {},
+    sedangDikerjakan: { index: null, oleh: null },
+    animasi: null
+  };
+  local.soalRebutan = null;
+  local.soalFix = null;
+  local.soalCek = null;
+
+  saveGlobal();
+
+  document.getElementById("pilihNama").value = "";
+  document.getElementById("absenSiswa").value = "";
+  document.getElementById("cekJawaban").value = "";
+  document.getElementById("cekPilihSiswa").value = "";
+  var fb = document.getElementById("fbCek");
+  if(fb){ fb.className = "feedback"; fb.innerHTML = ""; }
+
+  renderAll();
+  toast("✅ Data berhasil direset");
+});
+
+/* =========================================================
+   INIT
+   ========================================================= */
+loadGlobal();
+renderAll();
+</script>
+</body>
+</html>
